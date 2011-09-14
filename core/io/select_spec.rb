@@ -110,4 +110,31 @@ describe "IO.select" do
     t.join
   end
 
+
+  it "sleeps given a nil timeout" do
+    read = nil
+    wokeup = false
+    t = Thread.new do
+      IO.select([@rd], nil, nil, nil)
+      wokeup = true
+      # Don't bother checking that it's actually returned from the select,
+      # that's caught by another spec
+      read = @rd.read(1)
+    end
+
+    sleep(0.1)
+    wokeup.should == false
+
+    @wr.write("a")
+    # Sleep rather than join here so that if the select doesn't wake up
+    # we don't hang the process
+    sleep(0.1)
+
+    read.should == "a"
+    
+    t.kill
+    t.join
+  end
+
+
 end
