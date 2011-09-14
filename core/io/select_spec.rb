@@ -97,19 +97,17 @@ describe "IO.select" do
     lambda { IO.select(nil, nil, nil, -5)}.should raise_error(ArgumentError)
   end
   
-  it "sleeps forever for nil timeout" do
-    started = false
+  it "sets Thread.status to 'sleep'" do
     finished = false
     t = Thread.new do
-      started = true
-      IO.select(nil, nil, nil, nil)
-      finished = false
+      IO.select(nil, nil, nil, 0.25)
+      finished=true
     end
-    
-    Thread.pass until t.status == "sleep"
-    started.should == true
+    sleep(0.1)
+    finished.should == false
+    t.status.should == "sleep"
     t.kill
     t.join
-    finished.should == false
   end
+
 end
